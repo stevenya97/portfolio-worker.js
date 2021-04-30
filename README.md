@@ -4,5 +4,5 @@ cloudflare worker script for my portfolio website
 forked from fruitionsite.com
 
 Added functionality
--Seperate slug redirect for mobile devices
+-Redirect mobile users to mobile optimized page
 -block unlisted domains from loading(merge with preview commit)
