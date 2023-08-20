@@ -1,31 +1,99 @@
-/* CONFIGURATION STARTS HERE */
+  /* CONFIGURATION STARTS HERE */
+  
+  /* Step 1: enter your domain name like fruitionsite.com */
+  const MY_DOMAIN = 'stevenyang.co';
+  
+  /*
+   * Step 2: enter your URL slug to page ID mapping
+   * The key on the left is the slug (without the slash)
+   * The value on the right is the Notion page ID
+   */
+  const SLUG_TO_PAGE = {
+    '': '706ce2001fe34ea788f5f9f1fa12da0e',
+    'about': 'baa726a004054b21a8ea58e3cc2414d1',
+    'portfolio': 'c599cd48081d4fa092991167afad3be2',
+    'blog': 'b07ea20e11224c07b6940f69181cb1b9',
+    'gallery': '066bbe11970248d9a9b63ec25da6af37',
+    'gogh': 'a6d4e57855214b99b2ab1d8cbdcd1ece',
+    'apps': 'b1e154a4fce2409f9362a6ca56cb8ff8',
+  };
+  
+  /* Step 3: enter your page title and description for SEO purposes */
+  const PAGE_TITLE = 'Steven Yang';
+  const PAGE_DESCRIPTION = 'Personal website of Steven Y';
+  const PAGE_LOGO = 'https://s3.us-west-2.amazonaws.com/secure.notion-static.com/6b849e77-ab81-4546-8514-4cf0ec67eb28/d5f89acf8c3bfbdfe271e9ace851c063.jfif?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220925%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220925T202936Z&X-Amz-Expires=86400&X-Amz-Signature=dfecdb41a05210a674fc672b01e8b54f6170ada9de6970a6252abf8a7b5a03e5&X-Amz-SignedHeaders=host&x-id=GetObject';
+  
+  /* Step 4: enter a Google Font name, you can choose from https://fonts.google.com */
+  const GOOGLE_FONT = 'Comfortaa';
+  
+  /* Step 5: enter any custom scripts you'd like */
+  const CUSTOM_SCRIPT = 
+  `
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YEFRJ9FVTC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-/* Step 1: enter your domain name like fruitionsite.com */
-const MY_DOMAIN = 'syang.me';
+  gtag('config', 'G-YEFRJ9FVTC');
+</script>
+  `;
+  
+  const CUSTOM_CSS = 
+  `
+  
+  /* Remove header elements and fix bottom padding */
+  
+  //div.notion-topbar-mobile > div:nth-child(1) { padding: 0px 10px !important; }
+  
+  /* background border */
+  .notion-page-content {
+    padding-bottom: 0rem !important;
+    padding-top: 3rem !important;
+    background: rgba(128, 128, 128, 0.075);
+    border-radius: 1rem;
+    margin-top: 0rem;
+    margin-right: 0;
+    margin-bottom: 5rem ;
+    margin-left: 0;
+  }
 
-/*
-* Step 2: enter your URL slug to page ID mapping
-* The key on the left is the slug (without the slash)
-* The value on the right is the Notion page ID
-*/
-const SLUG_TO_PAGE = {
-  '': '706ce2001fe34ea788f5f9f1fa12da0e',
-  'mobile': 'b74c2247e6894c5ba29d165af7448254',
-  'gogh': 'a6d4e57855214b99b2ab1d8cbdcd1ece',
-  'photos': '066bbe11970248d9a9b63ec25da6af37',
-};
+  .notion-page-content { padding-bottom: 0vh !important; margin-bottom: 0vh !important; }
+  /* Center social links and pull them down off the bottom of page */
+  div.notion-selectable.notion-transclusion_container-block {
+      text-align: center;
+      justify-content: center !important;
+      //margin-bottom: -12.5rem !important;
+  }
+  div.notion-selectable.notion-transclusion_reference-block {
+      text-align: center;
+      justify-content: center !important;
+      //margin-bottom: -12.5rem !important;
+  }
+  /* Center breadcrumb in footer */
+  .notion-breadcrumb-block {
+    display: flex !important;
+    justify-content: center !important;
+  }
+  /* Hide icons for all sub-pages in footer breadcrumb */
+  .notion-breadcrumb-block > div > div > div:not(:first-child) .notion-record-icon {
+    display: none !important;
+  }
+  /* Standardize border radius of all images and turn off image preview */
+.notion-image-block img {
+    pointer-events: none !important;
+    border-radius: 0.5rem !important;
+}
+.notion-image-block {
+    //pointer-events: none !important;
+    border-radius: 0.5rem !important;
+}
 
-/* Step 3: enter your page title and description for SEO purposes */
-const PAGE_TITLE = 'Steven Yang';
-const PAGE_DESCRIPTION = 'Steven Yang&#39;s portfolio';
 
-/* Step 4: enter a Google Font name, you can choose from https://fonts.google.com */
-const GOOGLE_FONT = 'Comfortaa';
 
-/* Step 5: enter any custom scripts you'd like */
-const CUSTOM_SCRIPT = ``;
-
-/* CONFIGURATION ENDS HERE */
+  `;
+  /* CONFIGURATION ENDS HERE */
   
   const PAGE_TO_SLUG = {};
   const slugs = [];
@@ -80,8 +148,6 @@ const CUSTOM_SCRIPT = ``;
     if (request.method === 'OPTIONS') {
       return handleOptions(request);
     }
-    let userAgent = request.headers.get('User-Agent') || '';
-    //let mobile=false;
     let url = new URL(request.url);
     url.hostname = 'www.notion.so';
     if (url.pathname === '/robots.txt') {
@@ -92,17 +158,8 @@ const CUSTOM_SCRIPT = ``;
       response.headers.set('content-type', 'application/xml');
       return response;
     }
-    let fullPathname = request.url.replace("https://" + MY_DOMAIN, "");
     let response;
-    //TODO: fix infinite redirects on mobile
-    /*if(isMobileAgent(userAgent)) {
-      //const pageId = 'b74c2247e6894c5ba29d165af7448254';
-      //mobile=true;
-      //return Response.redirect('https://' + MY_DOMAIN + '/' + pageId, 302);
-    } else{
-      //return Response.redirect('https://bing.com', 301);
-    }*/
-    if (url.pathname.startsWith('/app') && url.pathname.endsWith('js')) {
+    if (url.pathname.endsWith('js')) {
       response = await fetch(url.toString());
       let body = await response.text();
       response = new Response(body.replace(/www.notion.so/g, MY_DOMAIN).replace(/notion.so/g, MY_DOMAIN), response);
@@ -111,7 +168,7 @@ const CUSTOM_SCRIPT = ``;
     } else if ((url.pathname.startsWith('/api'))) {
       // Forward API
       response = await fetch(url.toString(), {
-        body: request.body,
+        body: url.pathname.startsWith('/api/v3/getPublicPageData') ? null : request.body,
         headers: {
           'content-type': 'application/json;charset=UTF-8',
           'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
@@ -121,10 +178,11 @@ const CUSTOM_SCRIPT = ``;
       response = new Response(response.body, response);
       response.headers.set('Access-Control-Allow-Origin', '*');
       return response;
-    } else if ( slugs.indexOf(url.pathname.slice(1)) > -1) {
+    } else if (slugs.indexOf(url.pathname.slice(1)) > -1) {
       const pageId = SLUG_TO_PAGE[url.pathname.slice(1)];
       return Response.redirect('https://' + MY_DOMAIN + '/' + pageId, 301);
-    } else if (pages.indexOf(url.pathname.slice(1)) === -1 && url.pathname.slice(1).match(/[0-9a-f]{32}/)) {
+    } else if (
+    pages.indexOf(url.pathname.slice(1)) === -1 && url.pathname.slice(1).match(/[0-9a-f]{32}/)) {
       return Response.redirect('https://' + MY_DOMAIN, 301);
     } else {
       response = await fetch(url.toString(), {
@@ -139,13 +197,7 @@ const CUSTOM_SCRIPT = ``;
   
     return appendJavascript(response, SLUG_TO_PAGE);
   }
-
-  function isMobileAgent(userAgent) {
-    var check = false;
-    (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(userAgent)
-    return check;
-  }
-
+  
   class MetaRewriter {
     element(element) {
       if (PAGE_TITLE !== '') {
@@ -157,6 +209,10 @@ const CUSTOM_SCRIPT = ``;
           element.setInnerContent(PAGE_TITLE);
         }
       }
+      if (element.getAttribute('property') === 'og:image'
+          || element.getAttribute('name') === 'twitter:image') {
+          element.setAttribute('content', PAGE_LOGO);
+        }
       if (PAGE_DESCRIPTION !== '') {
         if (element.getAttribute('name') === 'description'
           || element.getAttribute('property') === 'og:description'
@@ -168,8 +224,16 @@ const CUSTOM_SCRIPT = ``;
         || element.getAttribute('name') === 'twitter:url') {
         element.setAttribute('content', MY_DOMAIN);
       }
-      if (element.getAttribute('name') === 'apple-itunes-app') {
-        element.remove();
+      if (element.getAttribute('name') === 'apple-itunes-app'
+          || element.getAttribute('name') === 'twitter:site'
+          || element.getAttribute('property') === 'og:site_name') {
+          element.remove();
+      }
+      if ((element.getAttribute('name') === 'twitter:image'
+          || element.getAttribute('property') === 'og:image')
+          && element.getAttribute('content') === 'https://www.notion.so/images/meta/default.png') {
+          // TODO: update content based on input field for the sharing image
+          element.remove();
       }
     }
   }
@@ -177,9 +241,9 @@ const CUSTOM_SCRIPT = ``;
   class HeadRewriter {
     element(element) {
       if (GOOGLE_FONT !== '') {
-        element.append(`<link href="https://fonts.googleapis.com/css?family=${GOOGLE_FONT.replace(' ', '+')}:Regular,Bold,Italic&display=swap" rel="stylesheet">
+        element.append(`<link href="https://fonts.googleapis.com/css?family=${GOOGLE_FONT.replace(' ', '+')}:Regular,Bold,Italic&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
         <style>* { font-family: "${GOOGLE_FONT}" !important; }</style>`, {
-         html: true
+          html: true
         });
       }
       element.append(`<style>
@@ -189,9 +253,11 @@ const CUSTOM_SCRIPT = ``;
       div.notion-topbar > div > div:nth-child(6) { display: none !important; }
       div.notion-topbar-mobile > div:nth-child(3) { display: none !important; }
       div.notion-topbar-mobile > div:nth-child(4) { display: none !important; }
+      div.notion-topbar-mobile > div:nth-child(5) { display: none !important; }
       div.notion-topbar > div > div:nth-child(1n).toggle-mode { display: block !important; }
       div.notion-topbar-mobile > div:nth-child(1n).toggle-mode { display: block !important; }
-      </style>`, {
+      
+      `, {
         html: true
       })
     }
@@ -202,8 +268,9 @@ const CUSTOM_SCRIPT = ``;
       this.SLUG_TO_PAGE = SLUG_TO_PAGE;
     }
     element(element) {
-      element.append(`<div style="display:none">Powered by <a href="http://fruitionsite.com">Fruition</a></div>
+      element.append(`
       <script>
+      window.CONFIG.domainBaseUrl = 'https://${MY_DOMAIN}';
       const SLUG_TO_PAGE = ${JSON.stringify(this.SLUG_TO_PAGE)};
       const PAGE_TO_SLUG = {};
       const slugs = [];
@@ -228,15 +295,27 @@ const CUSTOM_SCRIPT = ``;
           history.replaceState(history.state, '', '/' + slug);
         }
       }
+
+
+      function enableConsoleEffectAndSetMode(mode) {
+        if (__console && !__console.isEnabled) {
+          __console.enable()
+          window.location.reload()
+        } else {
+          __console.environment.ThemeStore.setState({ mode: mode })
+        }
+      }
       function onDark() {
-        el.innerHTML = '<div style="margin-left: auto; margin-right: 14px; min-width: 0px;"><div role="button" tabindex="0" style="user-select: none; transition: background 120ms ease-in 0s; cursor: pointer; border-radius: 44px;"><div style="display: flex; flex-shrink: 0; height: 14px; width: 26px; border-radius: 44px; padding: 2px; box-sizing: content-box; background: rgb(46, 170, 220); transition: background 200ms ease 0s, box-shadow 200ms ease 0s;"><div style="width: 14px; height: 14px; border-radius: 44px; background: white; transition: transform 200ms ease-out 0s, background 200ms ease-out 0s; transform: translateX(12px) translateY(0px);"></div></div></div></div>';
-        document.body.classList.add('dark');
-        __console.environment.ThemeStore.setState({ mode: 'dark' });
-      };
+        el.innerHTML =
+          '<div title="Change to Light Mode" style="margin-left: auto; margin-right: 14px; min-width: 0px;"><div role="button" tabindex="0" style="user-select: none; transition: background 120ms ease-in 0s; cursor: pointer; border-radius: 44px;"><div style="display: flex; flex-shrink: 0; height: 14px; width: 26px; border-radius: 44px; padding: 2px; box-sizing: content-box; background: rgb(46, 170, 220); transition: background 200ms ease 0s, box-shadow 200ms ease 0s;"><div style="width: 14px; height: 14px; border-radius: 44px; background: white; transition: transform 200ms ease-out 0s, background 200ms ease-out 0s; transform: translateX(12px) translateY(0px);"></div></div></div></div>'
+        document.body.classList.add('dark')
+        enableConsoleEffectAndSetMode('dark')
+      }
       function onLight() {
-        el.innerHTML = '<div style="margin-left: auto; margin-right: 14px; min-width: 0px;"><div role="button" tabindex="0" style="user-select: none; transition: background 120ms ease-in 0s; cursor: pointer; border-radius: 44px;"><div style="display: flex; flex-shrink: 0; height: 14px; width: 26px; border-radius: 44px; padding: 2px; box-sizing: content-box; background: rgba(135, 131, 120, 0.3); transition: background 200ms ease 0s, box-shadow 200ms ease 0s;"><div style="width: 14px; height: 14px; border-radius: 44px; background: white; transition: transform 200ms ease-out 0s, background 200ms ease-out 0s; transform: translateX(0px) translateY(0px);"></div></div></div></div>';
-        document.body.classList.remove('dark');
-        __console.environment.ThemeStore.setState({ mode: 'light' });
+        el.innerHTML =
+          '<div title="Change to Dark Mode" style="margin-left: auto; margin-right: 14px; min-width: 0px;"><div role="button" tabindex="0" style="user-select: none; transition: background 120ms ease-in 0s; cursor: pointer; border-radius: 44px;"><div style="display: flex; flex-shrink: 0; height: 14px; width: 26px; border-radius: 44px; padding: 2px; box-sizing: content-box; background: rgba(135, 131, 120, 0.3); transition: background 200ms ease 0s, box-shadow 200ms ease 0s;"><div style="width: 14px; height: 14px; border-radius: 44px; background: white; transition: transform 200ms ease-out 0s, background 200ms ease-out 0s; transform: translateX(0px) translateY(0px);"></div></div></div></div>'
+        document.body.classList.remove('dark')
+        enableConsoleEffectAndSetMode('light')
       }
       function toggle() {
         if (document.body.classList.contains('dark')) {
@@ -250,7 +329,19 @@ const CUSTOM_SCRIPT = ``;
         el.className = 'toggle-mode';
         el.addEventListener('click', toggle);
         nav.appendChild(el);
-        onLight();
+        //onLight();
+                // enable smart dark mode based on user-preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            onDark();
+        } else {
+            onLight();
+        }
+        
+        // try to detect if user-preference change
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            toggle();
+            
+        });
       }
       const observer = new MutationObserver(function() {
         if (redirected) return;
@@ -297,7 +388,7 @@ const CUSTOM_SCRIPT = ``;
         arguments[1] = arguments[1].replace('${MY_DOMAIN}', 'www.notion.so');
         return open.apply(this, [].slice.call(arguments));
       };
-    </script>${CUSTOM_SCRIPT}`, {
+    </script>${CUSTOM_SCRIPT}<style>${CUSTOM_CSS}</style>`, {
         html: true
       });
     }
